@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catch the Star</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top, #25315f, #0b1025 65%);
+      color: #f8fbff;
+    }
+
+    .game {
+      width: min(92vw, 520px);
+      padding: 24px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 6vw, 3.5rem);
+    }
+
+    p {
+      margin: 8px 0 18px;
+      color: #d7ddff;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      margin-bottom: 16px;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .play-field {
+      position: relative;
+      height: 300px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #17224b, #10162f);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .star {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      border: 0;
+      border-radius: 50%;
+      background: #ffd43b;
+      color: #321f00;
+      font-size: 1.6rem;
+      cursor: pointer;
+      box-shadow: 0 0 24px rgba(255, 212, 59, 0.9);
+      transition: transform 0.12s ease;
+    }
+
+    .star:hover {
+      transform: scale(1.12) rotate(12deg);
+    }
+
+    .message {
+      min-height: 1.5em;
+      margin-top: 16px;
+      font-weight: bold;
+      color: #8ce99a;
+    }
+
+    .restart {
+      margin-top: 16px;
+      padding: 10px 18px;
+      border: 0;
+      border-radius: 999px;
+      background: #74c0fc;
+      color: #07111f;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <main class="game">
+    <h1>Catch the Star</h1>
+    <p>Click the star as many times as you can before time runs out.</p>
+    <div class="stats" aria-live="polite">
+      <span>Score: <strong id="score">0</strong></span>
+      <span>Time: <strong id="time">20</strong>s</span>
+    </div>
+    <section class="play-field" id="field" aria-label="Game area">
+      <button class="star" id="star" aria-label="Catch the star">★</button>
+    </section>
+    <div class="message" id="message">Click the star to begin!</div>
+    <button class="restart" id="restart" type="button">Restart Game</button>
+  </main>
+
+  <script>
+    const field = document.getElementById('field');
+    const star = document.getElementById('star');
+    const scoreDisplay = document.getElementById('score');
+    const timeDisplay = document.getElementById('time');
+    const message = document.getElementById('message');
+    const restart = document.getElementById('restart');
+
+    let score = 0;
+    let timeLeft = 20;
+    let timer = null;
+    let playing = false;
+
+    function moveStar() {
+      const maxX = field.clientWidth - star.offsetWidth;
+      const maxY = field.clientHeight - star.offsetHeight;
+      star.style.left = `${Math.random() * maxX}px`;
+      star.style.top = `${Math.random() * maxY}px`;
+    }
+
+    function endGame() {
+      playing = false;
+      clearInterval(timer);
+      star.disabled = true;
+      message.textContent = `Game over! You caught ${score} star${score === 1 ? '' : 's'}.`;
+    }
+
+    function startTimer() {
+      timer = setInterval(() => {
+        timeLeft -= 1;
+        timeDisplay.textContent = timeLeft;
+
+        if (timeLeft <= 0) {
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function resetGame() {
+      score = 0;
+      timeLeft = 20;
+      playing = false;
+      clearInterval(timer);
+      scoreDisplay.textContent = score;
+      timeDisplay.textContent = timeLeft;
+      star.disabled = false;
+      message.textContent = 'Click the star to begin!';
+      moveStar();
+    }
+
+    star.addEventListener('click', () => {
+      if (!playing) {
+        playing = true;
+        message.textContent = 'Nice! Keep catching it!';
+        startTimer();
+      }
+
+      score += 1;
+      scoreDisplay.textContent = score;
+      moveStar();
+    });
+
+    restart.addEventListener('click', resetGame);
+    window.addEventListener('resize', moveStar);
+
+    resetGame();
+  </script>
+</body>
+</html>
